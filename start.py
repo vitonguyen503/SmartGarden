@@ -1,6 +1,6 @@
-from Library.EmulatorGUI import GPIO
-from Library.LCD import LCD1602
-import time 
+from Simulator.EmulatorGUI import GPIO
+from Simulator.pnhLCD1602 import LCD1602
+import time
 import traceback
 import threading
 
@@ -9,7 +9,6 @@ def Main():
         BTN_UP = 16
         BTN_DOWN = 19
         BTN_OK = 26
-        BTN_RESET = 20
         
         GPIO.setmode(GPIO.BCM)
         GPIO.setwarnings(False)
@@ -17,7 +16,6 @@ def Main():
         GPIO.setup(BTN_UP, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         GPIO.setup(BTN_DOWN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         GPIO.setup(BTN_OK, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        GPIO.setup(BTN_RESET, GPIO.IN, pull_up_down=GPIO.PUD_UP)  
         
         vegetables = ["rau muống", "rau cải", "bắp cải", "xà lách", "rau mùng tơi", "rau dền", "bí đỏ", "rau khoai lang", "khoai tây"]
         global current_selection  
@@ -29,9 +27,6 @@ def Main():
         
         global visible_offset
         visible_offset = 0  
-        
-        global in_message  
-        in_message = False  
         
         def move_selection_up():
             global current_selection, visible_offset
@@ -58,13 +53,11 @@ def Main():
             display_current_selection()  
 
         def select_vegetable():
-            global startCountFlag, in_message
+            global startCountFlag
             startCountFlag.set()  
-            in_message = True 
             threading.Thread(target=showMessage).start()
         
         def display_current_selection():
-            global in_message
             lcd.clear()
             lcd.set_cursor(0, 0)
             lcd.write_string("LUA CHON LOAI RAU")
@@ -76,24 +69,16 @@ def Main():
                         lcd.write_string(f"> {vegetables[visible_offset + i]}")
                     else:
                         lcd.write_string(f"  {vegetables[visible_offset + i]}")  
-
+        
         def showMessage():
-            global in_message
             lcd.clear()  
             lcd.set_cursor(0, 0)
-            lcd.write_string("Hello iemquynh")
-            time.sleep(2)  
-            in_message = False  
+            lcd.write_string("Hello iemquynh")  
+            
 
         display_current_selection()
 
-        while True:  
-            if GPIO.input(BTN_RESET) == GPIO.LOW:  
-                current_selection = 0  
-                visible_offset = 0  
-                display_current_selection()  
-                time.sleep(0.3)  
-            
+        while not startCountFlag.is_set():
             if GPIO.input(BTN_UP) == GPIO.LOW:  
                 move_selection_up()
                 time.sleep(0.3)  

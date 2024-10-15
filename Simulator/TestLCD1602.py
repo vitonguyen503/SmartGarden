@@ -1,4 +1,4 @@
-from pnhLCD1602 import LCD1602
+from Simulator.pnhLCD1602 import LCD1602
 import pygame
 import time 
 if __name__ == "__main__":
