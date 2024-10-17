@@ -1,4 +1,4 @@
-# install pygame to run: pip install pygame
+# install pygame to run: pip install
 import pygame
 
 class LCD1602:
@@ -10,7 +10,7 @@ class LCD1602:
         self.num_lines = num_lines
         self.num_cols = num_cols
         self.screen = pygame.display.set_mode((self.width, self.height))
-        pygame.display.set_caption("LCD Display")
+        pygame.display.set_caption("LCD")
         self.font = pygame.font.Font(pygame.font.match_font('courier'), 24)
         self.lines = ["" for _ in range(self.num_lines)]  # Support for more lines
         self.backlight = True

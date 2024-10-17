@@ -1,6 +1,7 @@
 from Simulator.EmulatorGUI import GPIO
 from Simulator.DHT22 import DHT22
-from Simulator.pnhLCD1602 import LCD1602
+# from Simulator.pnhLCD1602 import LCD1602
+from Library.LCD import LCD1602
 import pygame
 import time
 import traceback
@@ -24,7 +25,7 @@ def Main():
         GPIO.setup(MAX_TEMP_DOWN, GPIO.IN, pull_up_down = GPIO.PUD_DOWN) 
 
         # Read data from sensor
-        lcd = LCD1602(300, 100)
+        lcd = LCD1602(500, 200, 10, 32)
         input = DHT22(INPUT)
         print(input.read())
         allow_temp = 25
@@ -35,7 +36,7 @@ def Main():
             temp, humidity = input.read()
 
             lcd.set_cursor(0, 0)  # Đặt con trỏ ở dòng thứ 2
-            lcd.write_string(f"Temp: {round(temp, 1)}")
+            lcd.write_string(f"Nhiệt độ: {round(temp, 1)}")
             lcd.set_cursor(1, 0)
             lcd.write_string(f"Limit: {allow_temp}")
 

@@ -8,10 +8,8 @@ import traceback
 import random
 import threading
 
-# This is the Mid-term exam's code. Just use for watching how we can handle thread in python
-
-temp, hum = 0, 0
-count_70, count_50 = 0, 0
+asTem, soilMoi = 0, 0
+n, p, k = 0, 0, 0
 
 def Main():
     try:
@@ -19,29 +17,26 @@ def Main():
 
         GPIO.setwarnings(False)
 
-        WEIGHT_70 = 27
-        WEIGHT_50 = 17
-        ROLE_70 = 26
-        ROLE_50 = 22
-        LCD1 = 2
-        LCD2 = 3
-        START = 24
-        STOP = 23
-        LED = 16
-        DHT22_INPUT = 4
+        AHT20_1 = 2
+        AHT20_2 = 3
+        SOIL_MOI = 17
+        LED = 23
+        BUZZER = 22
+        PUMP = 24
+        UP = 16
+        DOWN = 19
+        RESET = 20
+        OK = 26
 
-        gpioPin = [WEIGHT_70, WEIGHT_50, ROLE_70, ROLE_50, LCD1, LCD2, START, STOP, LED, DHT22_INPUT]
+        gpioPin = [AHT20_1, AHT20_2, SOIL_MOI, LED, BUZZER, PUMP, UP, DOWN, RESET, OK]
       
         # Setup GPIO pin
         for pin in gpioPin:
-            if pin == START or pin == STOP:
-                GPIO.setup(pin, GPIO.IN, initial=GPIO.HIGH, pull_up_down=GPIO.PUD_UP)
-            elif pin == DHT22_INPUT:
-                GPIO.setup(pin, GPIO.IN)
-            else:
+            if pin == LED or pin == BUZZER:
                 GPIO.setup(pin, GPIO.OUT)
+            else:
+                GPIO.setup(pin, GPIO.IN)
 
-        # Read data from sensor
         lcd = LCD1602(300, 100)
         dht22Value = DHT22(DHT22_INPUT)
 
