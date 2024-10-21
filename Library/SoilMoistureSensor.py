@@ -6,10 +6,7 @@ class SoilMoistureSensor:
         self.digital_pin = digital_pin
 
     def read(self):
-        moisture = random.uniform(50.0, 100.0)
-        
-        time.sleep(1)
-        
+        moisture = 40 # random.uniform(40.0, 95.0)
         return moisture
 
 def readMoistureSensor(digital_pin):

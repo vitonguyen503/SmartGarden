@@ -2,7 +2,7 @@
 import pygame
 
 class LCD1602:
-    def __init__(self, width=400, height=120, num_lines=4, num_cols=20, address=0x27):
+    def __init__(self, width=500, height=100, num_lines=2, num_cols=32, address=0x27):
         pygame.init()
         self.width = width
         self.height = height

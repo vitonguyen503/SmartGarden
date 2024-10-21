@@ -5,14 +5,11 @@ class SoilNPKSensor:
     def __init__(self):
         pass
 
-    def read(self):
+    def read():
         # Giả lập giá trị Nitơ, Phốt pho, Kali
-        nitrogen = random.uniform(0.0, 200.0)  # Nồng độ Nitơ (mg/kg)
-        phosphorus = random.uniform(0.0, 100.0)  # Nồng độ Phốt pho (mg/kg)
-        potassium = random.uniform(0.0, 150.0)  # Nồng độ Kali (mg/kg)
-        
-        time.sleep(1)
-        
+        nitrogen = random.uniform(0.2, 1)  # Nồng độ Nitơ (g/kg)
+        phosphorus = random.uniform(0.2, 0.5)  # Nồng độ Phốt pho (g/kg)
+        potassium = random.uniform(0.2, 0.5)  # Nồng độ Kali (g/kg)
         return nitrogen, phosphorus, potassium
 
 def read_sensor():

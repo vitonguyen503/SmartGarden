@@ -10,9 +10,6 @@ class AHT20:
     def read(self):
         temperature = random.uniform(20.0, 40.0)  
         humidity = random.uniform(60.0, 95.0)
-        
-        time.sleep(1)
-        
         return temperature, humidity
 
 def readSensor(SDA_pin, SCL_pin):
