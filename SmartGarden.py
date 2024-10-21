@@ -93,9 +93,6 @@ def Main():
         measuring, pumping, buzzing, ledON = False, False, False, False
         soilMoi, atmTem, N, P, K = 0, 0, 0, 0, 0
         measuringFlag = threading.Event()
-        ledONLock = threading.Lock()
-        ledControlLock = threading.Lock()
-        LCDLock = threading.Lock()
 
         for pin in gpioPin:
             if pin == LED or pin == BUZZER or pin == PUMP:
@@ -224,84 +221,47 @@ def Main():
             
         def startLED(lcd):
             # Logic: when N or P or K's amount is low, activate LED and display noti to LCD
-            global N, P, K, ledON, ledONLock
-
-            with ledONLock:
-                if ledON:
-                    return
-
-                ledON = True
-
-                print(f"Hi, im {threading.current_thread().name}")
-                # NLim = vegetablesInfo[str(current_selection)]["N"]
-                # PLim = vegetablesInfo[str(current_selection)]["P"]
-                # KLim = vegetablesInfo[str(current_selection)]["K"]
-
-                threading.Thread(target=activateLED).start()
-                threading.Thread(target=displayNPKState, args=(lcd,)).start()                      
-                # threading.Thread(target=addNPK).start()
-
-                while ledON: # N < NLim[0] or P < PLim[0] or K < KLim[0]: 
-                    # Listen whether OK button is pushed or not
-                    if GPIO.input(BTN_OK) == GPIO.HIGH:
-                        ledON = False
-                        break
+            global N, P, K, ledON, buzzing, pumping
                 
-                # ledON = False
-
-                # # Break before reading sensors' data
-                time.sleep(1)
-                threading.Thread(target=getDataFromNPKSensor).start()
-                threading.Thread(target=displayMeasuringState, args=(lcd,)).start()
-
-        def activateLED():
-            with ledControlLock:
-                global N, P, K, ledON
-                print(f"Hi, im {threading.current_thread().name}")
-
-                NLim = vegetablesInfo[str(current_selection)]["N"]
-                PLim = vegetablesInfo[str(current_selection)]["P"]
-                KLim = vegetablesInfo[str(current_selection)]["K"]
-
-                while ledON and (N < NLim[0] or P < PLim[0] or K < KLim[0]):
-                    GPIO.output(LED, GPIO.HIGH)
-                    time.sleep(0.5)
-                    GPIO.output(LED, GPIO.LOW)
-                    time.sleep(0.5)
-            
-        def addNPK():
-            global N, P, K, ledON
+            ledON = True
+            print(f"Hi, im {threading.current_thread().name}")
             NLim = vegetablesInfo[str(current_selection)]["N"]
             PLim = vegetablesInfo[str(current_selection)]["P"]
             KLim = vegetablesInfo[str(current_selection)]["K"]
 
-            while ledON and (N < NLim[0] or P < PLim[0] or K < KLim[0]):
-                if N < NLim[0]:
-                    N += 0.05
-                if P < PLim[0]:
-                    P += 0.05
-                if K < KLim[0]:
-                    K += 0.05
-                print("Adding NPK")
-                time.sleep(1)    
-            print("Completed adding NPK!")
-        
-        def displayNPKState(lcd):
-            with LCDLock:
-                global N, P, K, ledON
-                print(f"Hi, im {threading.current_thread().name}")
+            # threading.Thread(target=activateLED).start()
+            GPIO.output(LED, GPIO.HIGH)
 
-                NLim = vegetablesInfo[str(current_selection)]["N"]
-                PLim = vegetablesInfo[str(current_selection)]["P"]
-                KLim = vegetablesInfo[str(current_selection)]["K"]
+            # Start displaying the notification
+            lcd.clear()
+            lcd.set_cursor(0, 0)
+            lcd.write_string("Cần bón thêm: ")
+            lcd.set_cursor(1, 0)
+            lcd.write_string(f"N: {(NLim[0] - N if NLim[0] > N else 0):.2f}, P: {(PLim[0] - P  if PLim[0] > P else 0):.2f}, K: {(KLim[0] - K  if KLim[0] > K else 0):.2f} (g/kg)")           
 
-                while ledON: # and (N < NLim[0] or P < PLim[0] or K < KLim[0]):
-                    lcd.clear()
-                    lcd.set_cursor(0, 0)
-                    lcd.write_string("Cần bón thêm: ")
-                    lcd.set_cursor(1, 0)
-                    lcd.write_string(f"N: {(NLim[0] - N):.2f}, P: {(PLim[0] - P):.2f}, K: {(KLim[0] - K):.2f} (g/kg)")
-                    time.sleep(1)
+            while ledON and not pumping and not buzzing:
+                # Listen whether OK button is pushed or not
+                if GPIO.input(BTN_OK) == GPIO.HIGH:
+                    ledON = False
+                    break
+            
+            ledON = False
+            GPIO.output(LED, GPIO.LOW)
+
+            # Break before reading sensors' data
+            time.sleep(1)
+            threading.Thread(target=getDataFromNPKSensor).start()
+            threading.Thread(target=displayMeasuringState, args=(lcd,)).start()
+
+        def activateLED():
+            global ledON, buzzing, pumping
+            # print(f"Hi, im {threading.current_thread().name}")
+
+            while ledON and not buzzing and not pumping:
+                GPIO.output(LED, GPIO.HIGH)
+                time.sleep(0.5)
+                GPIO.output(LED, GPIO.LOW)
+                time.sleep(0.5)
 
         def startMeasure(lcd):
             global measuring, N, P, K, soilMoi, atmTem, buzzing, pumping, ledON
@@ -332,9 +292,9 @@ def Main():
                         threading.Thread(target=startBuzzer, args=(lcd, )).start()
                 
                 # If there's not enough NPK, activate LED + display noti to LCD
-                # elif N < NLim[0] or P < PLim[0] or K < KLim[0]:
-                #     if not buzzing and not pumping and not ledON:
-                #         threading.Thread(target=startLED, args=(lcd,)).start()
+                elif N < NLim[0] or P < PLim[0] or K < KLim[0]:
+                    if not buzzing and not pumping and not ledON:
+                        threading.Thread(target=startLED, args=(lcd,)).start()
         
         display_current_selection()
 
